@@ -26,3 +26,20 @@ The storage server never sees keys, passwords, or plaintext.
 - A dependency-heavy framework
 
 Zerok is intentionally boring, predictable, and trustworthy.
+
+## Getting started
+
+- Full setup, usage, self-hosting, and testing walkthrough: [`initial_use.md`](initial_use.md)
+- Quickstart checklist: [`docs/QUICKSTART.md`](docs/QUICKSTART.md)
+- Design and security background: [`docs/`](docs/), [`SECURITY.md`](SECURITY.md)
+
+## Build & test
+
+```bash
+pip install cryptography blake3
+pytest tests/
+cd android && chmod +x gradlew && ./gradlew assembleDebug
+```
+
+These commands come from the repo's own `initial_use.md` and
+`.github/workflows/main.yml`; they were not re-executed in this certification pass.
