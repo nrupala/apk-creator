@@ -62,7 +62,7 @@ jobs:
           if [ $code -ne 0 ]; then
             # Loud failure: surface the Gradle tail as a check annotation so
             # the failure reason is readable from the run, not buried in logs.
-            python3 -c "import pathlib; t=pathlib.Path('gradle-build.log').read_text(errors='replace')[-3500:]; print('::error::'+t.replace('%','%25').replace(chr(13),'%0D').replace(chr(10),'%0A'))"
+            python3 -c "import pathlib; t=pathlib.Path('gradle-build.log').read_text(errors='replace'); i=t.find('* What went wrong:'); t=(t[i:i+3200] if i>=0 else t[-3200:]); print('::error::'+t.replace('%','%25').replace(chr(13),'%0D').replace(chr(10),'%0A'))"
           fi
           exit $code
 
