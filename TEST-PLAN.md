@@ -13,7 +13,7 @@ exercised manually per `initial_use.md`.
 
 | Suite | Covers | Run it | Runs in CI |
 |---|---|---|---|
-| pytest suite (`tests/test_blob_integrity.py`, `tests/test_invariant.py`) | XChaCha20-Poly1305 encrypt/decrypt round-trips via `zerok.crpyto`, blob encrypt/decrypt and blob-id non-determinism via `zerok.blob` | `pip install cryptography blake3 argon2-cffi requests pytest && pytest tests/ -q` | Yes — `Tests` workflow (`.github/workflows/tests.yml`) |
+| pytest suite (`tests/test_blob_integrity.py`, `tests/test_invariant.py`) | XChaCha20-Poly1305 encrypt/decrypt round-trips via `zerok.crpyto`, blob encrypt/decrypt and blob-id non-determinism via `zerok.blob` | `pip install cryptography blake3 argon2-cffi requests pytest && python -m pytest tests/ -q` (module form, so the repo root is on `sys.path` and the `zerok` package imports) | Yes — `Tests` workflow (`.github/workflows/tests.yml`) |
 | Android debug build | Manifest merge, resource/link and compile of the Android shell at compileSdk/targetSdk 34 | `cd android && ./gradlew assembleDebug` (CI downloads Gradle 8.2 directly) | Yes — `Android APK Build` workflow (`.github/workflows/main.yml`) |
 | CodeQL static analysis | Python and Java/Kotlin surfaces | GitHub CodeQL | Yes — `CodeQL` workflow (`.github/workflows/codeql.yml`), push/PR + weekly |
 
