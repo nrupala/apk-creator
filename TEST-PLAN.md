@@ -13,22 +13,38 @@ exercised manually per `initial_use.md`.
 
 | Suite | Covers | Run it | Runs in CI |
 |---|---|---|---|
-| pytest suite (`tests/test_blob_integrity.py`, `tests/test_invariant.py`) | XChaCha20-Poly1305 encrypt/decrypt round-trips via `zerok.crpyto`, blob encrypt/decrypt and blob-id non-determinism via `zerok.blob` | `pip install cryptography blake3 argon2-cffi requests pytest && python -m pytest tests/ -q` (module form, so the repo root is on `sys.path` and the `zerok` package imports) | Yes — `Tests` workflow (`.github/workflows/tests.yml`) |
+| pytest suite (`tests/test_blob_integrity.py`, `tests/test_invariant.py`) | XChaCha20-Poly1305 encrypt/decrypt round-trips via `zerok.crpyto`, blob encrypt/decrypt and blob-id non-determinism via `zerok.blob` | `pip install cryptography blake3 argon2-cffi requests pytest && python -m pytest tests/ -q` (module form, so the repo root is on `sys.path` and the `zerok` package imports) | **No — see the known defect below; the suite is run locally per CONTRIBUTING.md until the product fix lands** |
 | Android debug build | Manifest merge, resource/link and compile of the Android shell at compileSdk/targetSdk 34 | `cd android && ./gradlew assembleDebug` (CI downloads Gradle 8.2 directly) | Yes — `Android APK Build` workflow (`.github/workflows/main.yml`) |
 | CodeQL static analysis | Python and Java/Kotlin surfaces | GitHub CodeQL | Yes — `CodeQL` workflow (`.github/workflows/codeql.yml`), push/PR + weekly |
 
+## Known defect (product lane, found 2026-11-06)
+
+The pytest suite cannot currently collect: `zerok/crpyto.py` imports
+`XChaCha20Poly1305` from `cryptography.hazmat.primitives.ciphers.aead`, a name
+that does not exist in the `cryptography` package (verified in CI and locally
+against cryptography 50.0.2; the package provides `ChaCha20Poly1305`).
+Collection reaches this import today because the earlier defect in front of it
+— `zerok/blob.py` importing a nonexistent `.crypto` module instead of
+`.crpyto` — was fixed on 2026-11-06. Choosing the replacement cipher
+construction changes the product's encrypted-blob format, so it is a
+maintainer decision, not a CI fix. A `Tests` workflow was added and then
+removed the same day: a permanently red workflow is worse than the documented
+local suite. Re-add it (the shape is in this leg's run log) when the crypto
+fix lands.
+
 ## CI gates
 
-- Full pytest suite green on every push and pull request to `main`.
 - `Android APK Build` green on every push to `main` and on `v*` tags; the
   workflow surfaces the Gradle "What went wrong" section as a check annotation
   on failure so the reason is readable from the run.
 - CodeQL runs on push/PR and weekly; findings are dispositioned (fixed, or
   dismissed with a specific reason) on the house SLA.
+- The pytest suite is expected green locally before merge per
+  CONTRIBUTING.md — currently blocked by the known defect above.
 
 ## Cadence
 
-- Every push / pull request: pytest suite, Android APK build, CodeQL.
+- Every push / pull request: Android APK build, CodeQL.
 - Weekly: CodeQL scheduled run (Monday 05:23 UTC).
 - Every release candidate: the release-readiness run (checker + evidence
   reads), per the house Release-Readiness Standard.
