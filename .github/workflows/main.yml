@@ -23,7 +23,16 @@ jobs:
           java-version: 17
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        # android-actions/setup-android@v3 failed at this step in every run
+        # sampled (Oct 2026: runs 38345946494, 38075573347, 37429284766) with all
+        # downstream steps skipped. The ubuntu-latest runner image ships the
+        # Android SDK preinstalled; use it directly and install the platform
+        # and build-tools this app targets (compileSdk 34).
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME/platforms"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Read version
         id: version
