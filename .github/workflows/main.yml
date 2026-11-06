@@ -56,7 +56,15 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradle-8.2/bin/gradle
-          gradle-8.2/bin/gradle assembleDebug --no-daemon
+          set +e
+          gradle-8.2/bin/gradle assembleDebug --no-daemon --stacktrace > gradle-build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            # Loud failure: surface the Gradle tail as a check annotation so
+            # the failure reason is readable from the run, not buried in logs.
+            python3 -c "import pathlib; t=pathlib.Path('gradle-build.log').read_text(errors='replace')[-3500:]; print('::error::'+t.replace('%','%25').replace(chr(13),'%0D').replace(chr(10),'%0A'))"
+          fi
+          exit $code
 
       - name: Set APK version
         if: success()
