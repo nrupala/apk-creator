@@ -25,7 +25,7 @@ jobs:
       - name: Run tests
         run: |
           set +e
-          pytest tests/ -q > pytest.log 2>&1
+          python -m pytest tests/ -q > pytest.log 2>&1
           code=$?
           if [ $code -ne 0 ]; then
             # Loud failure: surface the pytest tail as a check annotation.
